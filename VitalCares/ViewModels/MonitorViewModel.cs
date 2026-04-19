@@ -6,7 +6,21 @@ using System.Threading.Tasks;
 
 namespace VitalCares.ViewModels
 {
-    class MonitorViewModel
+    public class MonitorViewModel : BaseViewModel
     {
+        private double _currentPuls;
+
+        public double CurrentPuls
+        {
+            get => _currentPuls;
+            // Folosim SetProperty din BaseViewModel
+            set => SetProperty(ref _currentPuls, value);
+        }
+
+        public MonitorViewModel()
+        {
+            Title = "Monitorizare Live";
+            CurrentPuls = 0;
+        }
     }
 }

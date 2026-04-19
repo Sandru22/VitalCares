@@ -447,6 +447,7 @@ F:\VS_apps\VitalCares\VitalCares\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\
 F:\VS_apps\VitalCares\VitalCares\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\VitalCares.AssemblyInfoInputs.cache
 F:\VS_apps\VitalCares\VitalCares\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\VitalCares.AssemblyInfo.cs
 F:\VS_apps\VitalCares\VitalCares\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\VitalCares.csproj.CoreCompileInputs.cache
+F:\VS_apps\VitalCares\VitalCares\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\VitalCares.sourcelink.json
 F:\VS_apps\VitalCares\VitalCares\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\XamlC.stamp
 F:\VS_apps\VitalCares\VitalCares\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\VitalCares.csproj.Up2Date
 F:\VS_apps\VitalCares\VitalCares\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\VitalCares.dll

@@ -1,9 +1,10 @@
 namespace VitalCares.Views;
 
-public partial class DashboardPage : ContentView
+public partial class DashboardPage : ContentPage
 {
-	public DashboardPage()
+	public DashboardPage(ViewModels.MainViewModel viewModel)
 	{
 		InitializeComponent();
-	}
+        BindingContext = viewModel;
+    }
 }
