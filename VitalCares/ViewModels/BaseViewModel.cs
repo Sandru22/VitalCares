@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace VitalCares.ViewModels
 {
-    class MonitorViewModel
+    class BaseViewModel
     {
     }
 }
