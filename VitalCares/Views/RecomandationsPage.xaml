@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="VitalCares.Views.RecommendationsPage"
+             Title="RecommendationsPage">
+    <Grid RowDefinitions="Auto, *">
+        <VerticalStackLayout Grid.Row="0" Padding="20" BackgroundColor="#512BD4">
+            <Label Text="Sfaturile Medicului Tău" 
+                   TextColor="White" 
+                   FontSize="22" 
+                   FontAttributes="Bold" />
+            <Label Text="Urmează aceste recomandări pentru o sănătate mai bună" 
+                   TextColor="#D1C4E9" 
+                   FontSize="14" />
+        </VerticalStackLayout>
+
+        <CollectionView x:Name="recomList" Grid.Row="1">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <ContentView Padding="15,10,15,5">
+                        <Border StrokeShape="RoundRectangle 10"
+                                StrokeThickness="0"
+                                BackgroundColor="White">
+                            <Border.Shadow>
+                                <Shadow Brush="Black" Offset="0,2" Radius="5" Opacity="0.1" />
+                            </Border.Shadow>
+
+                            <HorizontalStackLayout Spacing="0">
+                                <BoxView WidthRequest="8" 
+                                         BackgroundColor="{Binding Color}" 
+                                         VerticalOptions="Fill" />
+
+                                <VerticalStackLayout Padding="15" Spacing="5">
+                                    <Label Text="{Binding Category}" 
+                                           FontSize="11" 
+                                           TextColor="{Binding Color}" 
+                                           FontAttributes="Bold" 
+                                           TextTransform="Uppercase"/>
+
+                                    <Label Text="{Binding Title}" 
+                                           FontSize="18" 
+                                           FontAttributes="Bold" 
+                                           TextColor="#333" />
+
+                                    <Label Text="{Binding Description}" 
+                                           FontSize="14" 
+                                           TextColor="#666" 
+                                           LineBreakMode="WordWrap" />
+
+                                    <Label Text="{Binding Date, StringFormat='Adăugat la: {0}'}" 
+                                           FontSize="11" 
+                                           TextColor="#999" 
+                                           Margin="0,5,0,0" />
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                        </Border>
+                    </ContentView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

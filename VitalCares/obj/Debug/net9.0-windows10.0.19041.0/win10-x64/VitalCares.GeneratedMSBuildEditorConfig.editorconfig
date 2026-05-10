@@ -52,20 +52,26 @@ build_metadata.AdditionalFiles.ManifestResourceName = VitalCares.Resources.Style
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Styles.xaml
 build_metadata.AdditionalFiles.RelativePath = Resources\Styles\Styles.xaml
 
+[F:/VS_apps/VitalCares/VitalCares/Views/Calendar.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = VitalCares.Views.Calendar.xaml
+build_metadata.AdditionalFiles.TargetPath = Views\Calendar.xaml
+build_metadata.AdditionalFiles.RelativePath = Views\Calendar.xaml
+
+[F:/VS_apps/VitalCares/VitalCares/Views/ConnectionTest.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = VitalCares.Views.ConnectionTest.xaml
+build_metadata.AdditionalFiles.TargetPath = Views\ConnectionTest.xaml
+build_metadata.AdditionalFiles.RelativePath = Views\ConnectionTest.xaml
+
 [F:/VS_apps/VitalCares/VitalCares/Views/DashboardPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = VitalCares.Views.DashboardPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\DashboardPage.xaml
 build_metadata.AdditionalFiles.RelativePath = Views\DashboardPage.xaml
 
-[F:/VS_apps/VitalCares/VitalCares/Views/HistoryPage.xaml]
+[F:/VS_apps/VitalCares/VitalCares/Views/RecomandationsPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
-build_metadata.AdditionalFiles.ManifestResourceName = VitalCares.Views.HistoryPage.xaml
-build_metadata.AdditionalFiles.TargetPath = Views\HistoryPage.xaml
-build_metadata.AdditionalFiles.RelativePath = Views\HistoryPage.xaml
-
-[F:/VS_apps/VitalCares/VitalCares/Views/RecommendationsPage.xaml]
-build_metadata.AdditionalFiles.GenKind = Xaml
-build_metadata.AdditionalFiles.ManifestResourceName = VitalCares.Views.RecommendationsPage.xaml
-build_metadata.AdditionalFiles.TargetPath = Views\RecommendationsPage.xaml
-build_metadata.AdditionalFiles.RelativePath = Views\RecommendationsPage.xaml
+build_metadata.AdditionalFiles.ManifestResourceName = VitalCares.Views.RecomandationsPage.xaml
+build_metadata.AdditionalFiles.TargetPath = Views\RecomandationsPage.xaml
+build_metadata.AdditionalFiles.RelativePath = Views\RecomandationsPage.xaml

@@ -26,5 +26,6 @@ namespace VitalCares.Classes
         // Flag pentru a marca dacă acest pachet este o alarmă asincronă
         public bool EsteAlarma { get; set; }
         public string MesajAlarma { get; set; }
+        public double SpO2 { get; set; }
     }
 }

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:calendar="clr-namespace:Syncfusion;assembly=Syncfusion.Licensing"
+             x:Class="VitalCares.Views.Calendar"
+             Title="Calendar">
+    <VerticalStackLayout Padding="20" Spacing="15">
+
+        <!-- Selector de Dată Nativ -->
+        <Label Text="Selectează Data:" FontAttributes="Bold" />
+        <DatePicker x:Name="datePicker" 
+                    Format="D" 
+                    DateSelected="OnDateSelected"
+                    TextColor="#512BD4"/>
+
+        <BoxView HeightRequest="1" Color="LightGray" />
+
+        <Label x:Name="lblSelectedDate" 
+               Text="Activități pentru Azi" 
+               FontSize="20" 
+               FontAttributes="Bold" 
+               TextColor="#333" />
+
+        <!-- Listă Activități -->
+        <CollectionView x:Name="lstActivities" EmptyView="Nu sunt activități programate pentru această zi.">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <VerticalStackLayout Padding="10">
+                        <Border Padding="15" StrokeShape="RoundRectangle 10" Stroke="LightGray">
+                            <HorizontalStackLayout Spacing="20">
+                                <!-- Indicator oră -->
+                                <Label Text="{Binding Time}" 
+                                       VerticalOptions="Center" 
+                                       FontAttributes="Bold" 
+                                       TextColor="#512BD4" />
+
+                                <!-- Detalii activitate -->
+                                <VerticalStackLayout VerticalOptions="Center">
+                                    <Label Text="{Binding Name}" FontSize="16" FontAttributes="Bold" />
+                                    <Label Text="{Binding Description}" FontSize="12" TextColor="Gray" />
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </VerticalStackLayout>
+</ContentPage>

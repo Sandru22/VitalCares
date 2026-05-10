@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="VitalCares.Views.ConnectionTest"
+             Title="ConnectionTest"
+             BackgroundColor="LightBlue">
+    <ScrollView>
+        <VerticalStackLayout Spacing="15" Padding="20">
+
+            <Label Text="Vital Signs Monitor" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" TextColor="#512BD4"/>
+            <Label x:Name="lblStatus" Text="Status: Deconectat" HorizontalOptions="Center" TextColor="Gray" />
+
+            <ActivityIndicator x:Name="Loader" IsRunning="False" Color="#512BD4" />
+
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                <Border Grid.Row="0" Grid.Column="0" StrokeShape="RoundRectangle 15" StrokeThickness="0">
+                    <Border.Shadow>
+                        <Shadow Brush="Black"
+                            Offset="5,5"
+                            Radius="10"
+                            Opacity="0.3" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="0" BackgroundColor="#FFE0E0" Padding="15">
+                        <Label Text="❤️ PULS" FontSize="12" FontAttributes="Bold" TextColor="Black"/>
+                        <Label x:Name="lblPuls" Text="--" FontSize="32" FontAttributes="Bold" HorizontalOptions="Center" TextColor="Black"/>
+                        <Label Text="bpm" FontSize="10" HorizontalOptions="End" TextColor="Black"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Row="0" Grid.Column="1" StrokeShape="RoundRectangle 15" StrokeThickness="0">
+                    <Border.Shadow>
+                        <Shadow Brush="Black"
+                            Offset="5,5"
+                            Radius="10"
+                            Opacity="0.3" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="1" BackgroundColor="#E0F0FF" Padding="15">
+                        <Label Text="🫁 SpO2" FontSize="12" FontAttributes="Bold" TextColor="Black"/>
+                        <Label x:Name="lblSpO2" Text="--" FontSize="32" FontAttributes="Bold" HorizontalOptions="Center" TextColor="Black"/>
+                        <Label Text="%" FontSize="10" HorizontalOptions="End" TextColor="Black"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Row="1" Grid.Column="0" StrokeShape="RoundRectangle 15" StrokeThickness="0">
+                    <Border.Shadow>
+                        <Shadow Brush="Black"
+                            Offset="5,5"
+                            Radius="10"
+                            Opacity="0.3" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="0" BackgroundColor="#FFF4E0" Padding="15">
+                        <Label Text="🌡️ TEMP" FontSize="12" FontAttributes="Bold" TextColor="Black"/>
+                        <Label x:Name="lblTemp" Text="--" FontSize="32" FontAttributes="Bold" HorizontalOptions="Center" TextColor="Black"/>
+                    <Label Text="°C" FontSize="10" HorizontalOptions="End"/>
+                </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 15" StrokeThickness="0">
+                    <Border.Shadow>
+                        <Shadow Brush="Black"
+                            Offset="5,5"
+                            Radius="10"
+                            Opacity="0.3" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="1" BackgroundColor="#E0FFE0" Padding="15">
+                        <Label Text="💧 HUM" FontSize="12" FontAttributes="Bold" TextColor="Black"/>
+                        <Label x:Name="lblHum" Text="--" FontSize="32" FontAttributes="Bold" HorizontalOptions="Center" TextColor="Black"/>
+                        <Label Text="%" FontSize="10" HorizontalOptions="End" TextColor="Black"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Row="2" Grid.ColumnSpan="2" StrokeShape="RoundRectangle 15" StrokeThickness="0">
+                    <Border.Shadow>
+                        <Shadow Brush="Black"
+                            Offset="5,5"
+                            Radius="10"
+                            Opacity="0.3" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Grid.Row="2" Grid.ColumnSpan="2" BackgroundColor="#F0F0F0" Padding="15">
+                        <Label Text="📉 ECG RAW DATA" FontSize="12" FontAttributes="Bold" TextColor="Black"/>
+                        <Label x:Name="lblEcg" Text="--" FontSize="24" HorizontalOptions="Center" TextColor="Black"/>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <Button x:Name="BtnConnect" Text="SCANARE ȘI CONECTARE" Clicked="OnConnectClicked" HeightRequest="60" BackgroundColor="White" TextColor="Black" />
+            <Button x:Name="BtnDisconnect" Text="DECONECTARE" Clicked="OnDisconnectClicked" IsVisible="False" BackgroundColor="White"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

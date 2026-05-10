@@ -67,6 +67,10 @@
         "net9.0-android35.0": {
           "targetAlias": "net9.0-android",
           "dependencies": {
+            "Microcharts": {
+              "target": "Package",
+              "version": "[0.9.5.9, )"
+            },
             "Microsoft.Extensions.Logging.Debug": {
               "target": "Package",
               "version": "[9.0.0, )"
@@ -80,6 +84,26 @@
               "target": "Package",
               "version": "[9.0.2, )",
               "autoReferenced": true
+            },
+            "Plugin.BLE": {
+              "target": "Package",
+              "version": "[3.2.0, )"
+            },
+            "Plugin.LocalNotification": {
+              "target": "Package",
+              "version": "[12.0.2, )"
+            },
+            "SkiaSharp.Views.Maui.Controls": {
+              "target": "Package",
+              "version": "[3.119.2, )"
+            },
+            "Syncfusion.Maui.Charts": {
+              "target": "Package",
+              "version": "[33.2.3, )"
+            },
+            "Syncfusion.Maui.Core": {
+              "target": "Package",
+              "version": "[33.2.3, )"
             }
           },
           "imports": [
@@ -106,6 +130,10 @@
         "net9.0-ios18.2": {
           "targetAlias": "net9.0-ios",
           "dependencies": {
+            "Microcharts": {
+              "target": "Package",
+              "version": "[0.9.5.9, )"
+            },
             "Microsoft.Extensions.Logging.Debug": {
               "target": "Package",
               "version": "[9.0.0, )"
@@ -119,6 +147,26 @@
               "target": "Package",
               "version": "[9.0.2, )",
               "autoReferenced": true
+            },
+            "Plugin.BLE": {
+              "target": "Package",
+              "version": "[3.2.0, )"
+            },
+            "Plugin.LocalNotification": {
+              "target": "Package",
+              "version": "[12.0.2, )"
+            },
+            "SkiaSharp.Views.Maui.Controls": {
+              "target": "Package",
+              "version": "[3.119.2, )"
+            },
+            "Syncfusion.Maui.Charts": {
+              "target": "Package",
+              "version": "[33.2.3, )"
+            },
+            "Syncfusion.Maui.Core": {
+              "target": "Package",
+              "version": "[33.2.3, )"
             }
           },
           "imports": [
@@ -145,6 +193,10 @@
         "net9.0-maccatalyst18.2": {
           "targetAlias": "net9.0-maccatalyst",
           "dependencies": {
+            "Microcharts": {
+              "target": "Package",
+              "version": "[0.9.5.9, )"
+            },
             "Microsoft.Extensions.Logging.Debug": {
               "target": "Package",
               "version": "[9.0.0, )"
@@ -158,6 +210,26 @@
               "target": "Package",
               "version": "[9.0.2, )",
               "autoReferenced": true
+            },
+            "Plugin.BLE": {
+              "target": "Package",
+              "version": "[3.2.0, )"
+            },
+            "Plugin.LocalNotification": {
+              "target": "Package",
+              "version": "[12.0.2, )"
+            },
+            "SkiaSharp.Views.Maui.Controls": {
+              "target": "Package",
+              "version": "[3.119.2, )"
+            },
+            "Syncfusion.Maui.Charts": {
+              "target": "Package",
+              "version": "[33.2.3, )"
+            },
+            "Syncfusion.Maui.Core": {
+              "target": "Package",
+              "version": "[33.2.3, )"
             }
           },
           "imports": [
@@ -185,6 +257,10 @@
         "net9.0-windows10.0.19041": {
           "targetAlias": "net9.0-windows10.0.19041.0",
           "dependencies": {
+            "Microcharts": {
+              "target": "Package",
+              "version": "[0.9.5.9, )"
+            },
             "Microsoft.Extensions.Logging.Debug": {
               "target": "Package",
               "version": "[9.0.0, )"
@@ -192,6 +268,26 @@
             "Microsoft.Maui.Controls": {
               "target": "Package",
               "version": "[9.0.14, )"
+            },
+            "Plugin.BLE": {
+              "target": "Package",
+              "version": "[3.2.0, )"
+            },
+            "Plugin.LocalNotification": {
+              "target": "Package",
+              "version": "[12.0.2, )"
+            },
+            "SkiaSharp.Views.Maui.Controls": {
+              "target": "Package",
+              "version": "[3.119.2, )"
+            },
+            "Syncfusion.Maui.Charts": {
+              "target": "Package",
+              "version": "[33.2.3, )"
+            },
+            "Syncfusion.Maui.Core": {
+              "target": "Package",
+              "version": "[33.2.3, )"
             }
           },
           "imports": [

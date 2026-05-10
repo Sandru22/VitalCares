@@ -1,5 +1,6 @@
 runtimes\win-x64\native\WebView2Loader.dll
 FluentUI.cs
+MauiMaterialAssets.ttf
 OpenSans-Regular.ttf
 OpenSans-Semibold.ttf
 appicon.ico
