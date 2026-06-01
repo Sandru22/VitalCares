@@ -2,61 +2,94 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="VitalCares.Views.RecommendationsPage"
-             Title="RecommendationsPage">
+             Title="Sfaturile Medicului"
+             BackgroundColor="#F4F6F9">
+    <!-- Fundalul unitar pentru consistență -->
+
     <Grid RowDefinitions="Auto, *">
-        <VerticalStackLayout Grid.Row="0" Padding="20" BackgroundColor="#512BD4">
+
+        <!-- HEADER SECTION (Actualizat cu verdele tematic) -->
+        <VerticalStackLayout Grid.Row="0" Padding="25,20" BackgroundColor="#10A37F">
             <Label Text="Sfaturile Medicului Tău" 
                    TextColor="White" 
                    FontSize="22" 
-                   FontAttributes="Bold" />
+                   FontAttributes="Bold" 
+                   Margin="0,0,0,4"/>
             <Label Text="Urmează aceste recomandări pentru o sănătate mai bună" 
-                   TextColor="#D1C4E9" 
-                   FontSize="14" />
+                   TextColor="#E0F2F1" 
+                FontSize="14" />
         </VerticalStackLayout>
 
-        <CollectionView x:Name="recomList" Grid.Row="1">
+        <!-- LISTA DE RECOMANDĂRI -->
+        <CollectionView x:Name="recomList" Grid.Row="1" Margin="0,5,0,10">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <ContentView Padding="15,10,15,5">
-                        <Border StrokeShape="RoundRectangle 10"
+                    <ContentView Padding="15,8,15,6">
+
+                        <!-- Card Recomandare -->
+                        <Border StrokeShape="RoundRectangle 12"
                                 StrokeThickness="0"
                                 BackgroundColor="White">
+
                             <Border.Shadow>
-                                <Shadow Brush="Black" Offset="0,2" Radius="5" Opacity="0.1" />
+                                <Shadow Brush="#000000" Offset="0,2" Radius="6" Opacity="0.04" />
                             </Border.Shadow>
 
-                            <HorizontalStackLayout Spacing="0">
-                                <BoxView WidthRequest="8" 
+                            <!-- Folosim Grid pentru a asigura maparea corectă a textului pe ecrane mici -->
+                            <Grid ColumnDefinitions="6, *">
+
+                                <!-- Dunga colorată din stânga (păstrată din ideea ta excelentă) -->
+                                <BoxView Grid.Column="0"
+                                         WidthRequest="6" 
                                          BackgroundColor="{Binding Color}" 
                                          VerticalOptions="Fill" />
 
-                                <VerticalStackLayout Padding="15" Spacing="5">
+                                <!-- Conținutul text al recomandării -->
+                                <VerticalStackLayout Grid.Column="1" Padding="16,14" Spacing="4">
+
+                                    <!-- Categorie -->
                                     <Label Text="{Binding Category}" 
                                            FontSize="11" 
                                            TextColor="{Binding Color}" 
                                            FontAttributes="Bold" 
-                                           TextTransform="Uppercase"/>
+                                           TextTransform="Uppercase"
+                                           CharacterSpacing="1"/>
+                                    <!-- Puțin spațiu între litere pentru aspect premium -->
 
+                                    <!-- Titlu -->
                                     <Label Text="{Binding Title}" 
-                                           FontSize="18" 
+                                           FontSize="17" 
                                            FontAttributes="Bold" 
-                                           TextColor="#333" />
+                                           TextColor="#222222" />
 
+                                    <!-- Descriere -->
                                     <Label Text="{Binding Description}" 
                                            FontSize="14" 
-                                           TextColor="#666" 
-                                           LineBreakMode="WordWrap" />
+                                           TextColor="#555555" 
+                                           LineBreakMode="WordWrap"
+                                           Margin="0,2,0,4"/>
 
+                                    <!-- Dată -->
                                     <Label Text="{Binding Date, StringFormat='Adăugat la: {0}'}" 
                                            FontSize="11" 
-                                           TextColor="#999" 
-                                           Margin="0,5,0,0" />
+                                           TextColor="#888888" 
+                                           Margin="0,4,0,0" />
                                 </VerticalStackLayout>
-                            </HorizontalStackLayout>
+                            </Grid>
                         </Border>
                     </ContentView>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Padding="40" Spacing="12">
+                    <Label Text="🧘" FontSize="48" HorizontalOptions="Center"/>
+                    <Label Text="Nu ai recomandări de la medicul tău pentru moment." 
+                               HorizontalOptions="Center" 
+                               TextColor="#6C757D" 
+                               FontSize="14"
+                               HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
         </CollectionView>
     </Grid>
 </ContentPage>

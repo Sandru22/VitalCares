@@ -4,20 +4,60 @@
     x:Class="VitalCares.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="VitalCares">
+    Title="VitalCares"
+    FlyoutBehavior="Flyout">
 
-    <TabBar>
-        <Tab Title="Live" Icon="dashboard_icon.png">
-            <ShellContent ContentTemplate="{DataTemplate views:DashboardPage}" />
-        </Tab>
-        <Tab Title="Istoric" Icon="history_icon.png">
-            <ShellContent ContentTemplate="{DataTemplate views:ConnectionTest}" />
-        </Tab>
-        <Tab Title="Recomandari" Icon="history_icon.png">
-            <ShellContent ContentTemplate="{DataTemplate views:RecommendationsPage}" />
-        </Tab>
-        <Tab Title="Calendar" Icon="history_icon.png">
-            <ShellContent ContentTemplate="{DataTemplate views:Calendar}" />
-        </Tab>
-    </TabBar>
+    <Shell.FlyoutHeader>
+        <Grid BackgroundColor="#10A37F" HeightRequest="150" Padding="20">
+            <Label Text="VitalCares Portal" 
+                   TextColor="White" 
+                   FontSize="20" 
+                   FontAttributes="Bold" 
+                   VerticalOptions="End" />
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <Shell.FlyoutFooter>
+        <VerticalStackLayout Padding="15" BackgroundColor="Transparent">
+            <BoxView HeightRequest="1" Color="#E0E0E0" Margin="0,0,0,15" />
+
+            <Button 
+                Text="Deconectare" 
+                TextColor="White"
+                BackgroundColor="#D32F2F" 
+                CornerRadius="8"
+                HeightRequest="45"
+                FontAttributes="Bold"
+                Clicked="OnLogoutClicked" />
+        </VerticalStackLayout>
+    </Shell.FlyoutFooter>
+
+    <ShellContent 
+        Route="LoginPage"
+        FlyoutItemIsVisible="False"
+        Shell.FlyoutBehavior="Disabled"
+        ContentTemplate="{DataTemplate views:LoginPage}" />
+
+    <ShellContent 
+        Route="RegisterPage"
+        FlyoutItemIsVisible="False"
+        Shell.FlyoutBehavior="Disabled"
+        ContentTemplate="{DataTemplate views:RegisterPage}" />
+
+    <FlyoutItem Title="Istoric" Icon="history_icon.png" Route="DashboardPage">
+        <ShellContent ContentTemplate="{DataTemplate views:DashboardPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Monitorizare" Icon="dashboard_icon.png" Route="ConnectionTest">
+        <ShellContent ContentTemplate="{DataTemplate views:ConnectionTest}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Recomandări" Icon="history_icon.png" Route="RecommendationsPage">
+        <ShellContent ContentTemplate="{DataTemplate views:RecommendationsPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Activități" Icon="history_icon.png" Route="Calendar">
+        <ShellContent ContentTemplate="{DataTemplate views:Calendar}" />
+    </FlyoutItem>
+
 </Shell>

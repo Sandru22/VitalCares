@@ -2,18 +2,19 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="VitalCares.Views.ConnectionTest"
-             Title="ConnectionTest"
-             BackgroundColor="LightBlue">
+             Title="Monitorizare în timp real"
+             xmlns:chart="clr-namespace:Syncfusion.Maui.Charts;assembly=Syncfusion.Maui.Charts"
+             BackgroundColor="#F4F6F9">
     <ScrollView>
         <VerticalStackLayout Spacing="15" Padding="20">
 
-            <Label Text="Vital Signs Monitor" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" TextColor="#512BD4"/>
+            <Label Text="Vital Signs Monitor" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" TextColor="#10A37F"/>
             <Label x:Name="lblStatus" Text="Status: Deconectat" HorizontalOptions="Center" TextColor="Gray" />
 
-            <ActivityIndicator x:Name="Loader" IsRunning="False" Color="#512BD4" />
+            <ActivityIndicator x:Name="Loader" IsRunning="False" Color="#10A37F" />
 
             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                <Border Grid.Row="0" Grid.Column="0" StrokeShape="RoundRectangle 15" StrokeThickness="0">
+                <Border Grid.Row="0" Grid.ColumnSpan="2" StrokeShape="RoundRectangle 15" StrokeThickness="0">
                     <Border.Shadow>
                         <Shadow Brush="Black"
                             Offset="5,5"
@@ -24,20 +25,6 @@
                         <Label Text="❤️ PULS" FontSize="12" FontAttributes="Bold" TextColor="Black"/>
                         <Label x:Name="lblPuls" Text="--" FontSize="32" FontAttributes="Bold" HorizontalOptions="Center" TextColor="Black"/>
                         <Label Text="bpm" FontSize="10" HorizontalOptions="End" TextColor="Black"/>
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border Grid.Row="0" Grid.Column="1" StrokeShape="RoundRectangle 15" StrokeThickness="0">
-                    <Border.Shadow>
-                        <Shadow Brush="Black"
-                            Offset="5,5"
-                            Radius="10"
-                            Opacity="0.3" />
-                    </Border.Shadow>
-                    <VerticalStackLayout Grid.Row="0" Grid.Column="1" BackgroundColor="#E0F0FF" Padding="15">
-                        <Label Text="🫁 SpO2" FontSize="12" FontAttributes="Bold" TextColor="Black"/>
-                        <Label x:Name="lblSpO2" Text="--" FontSize="32" FontAttributes="Bold" HorizontalOptions="Center" TextColor="Black"/>
-                        <Label Text="%" FontSize="10" HorizontalOptions="End" TextColor="Black"/>
                     </VerticalStackLayout>
                 </Border>
 
@@ -69,22 +56,41 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Border Grid.Row="2" Grid.ColumnSpan="2" StrokeShape="RoundRectangle 15" StrokeThickness="0">
+                <Border Grid.Row="2" Grid.ColumnSpan="2" StrokeShape="RoundRectangle 15" StrokeThickness="0" HeightRequest="250">
                     <Border.Shadow>
                         <Shadow Brush="Black"
                             Offset="5,5"
                             Radius="10"
                             Opacity="0.3" />
                     </Border.Shadow>
-                    <VerticalStackLayout Grid.Row="2" Grid.ColumnSpan="2" BackgroundColor="#F0F0F0" Padding="15">
-                        <Label Text="📉 ECG RAW DATA" FontSize="12" FontAttributes="Bold" TextColor="Black"/>
-                        <Label x:Name="lblEcg" Text="--" FontSize="24" HorizontalOptions="Center" TextColor="Black"/>
+                    <VerticalStackLayout BackgroundColor="#F8F8F8" Padding="5">
+                        <Label Text="📉 LIVE ECG MONITOR" FontSize="12" FontAttributes="Bold" Margin="10,0" TextColor="Black"/>
+
+                        <chart:SfCartesianChart HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" HeightRequest="200">
+                            <!-- Axa X - Timp sau Index -->
+                            <chart:SfCartesianChart.XAxes>
+                                <chart:NumericalAxis ShowMajorGridLines="False" IsVisible="False" />
+                            </chart:SfCartesianChart.XAxes>
+
+                            <!-- Axa Y - Valoare ECG -->
+                            <chart:SfCartesianChart.YAxes>
+                                <chart:NumericalAxis Minimum="0" Maximum="1024" ShowMajorGridLines="True" />
+                            </chart:SfCartesianChart.YAxes>
+
+                            <chart:SfCartesianChart.Series>
+                                <chart:LineSeries ItemsSource="{Binding EcgData}"
+                                      XBindingPath="Index"
+                                      YBindingPath="Value"
+                                      StrokeWidth="2"
+                                      EnableTooltip="False" />
+                            </chart:SfCartesianChart.Series>
+                        </chart:SfCartesianChart>
                     </VerticalStackLayout>
                 </Border>
             </Grid>
 
-            <Button x:Name="BtnConnect" Text="SCANARE ȘI CONECTARE" Clicked="OnConnectClicked" HeightRequest="60" BackgroundColor="White" TextColor="Black" />
-            <Button x:Name="BtnDisconnect" Text="DECONECTARE" Clicked="OnDisconnectClicked" IsVisible="False" BackgroundColor="White"/>
+            <Button x:Name="BtnConnect" Text="SCANARE ȘI CONECTARE" Clicked="OnConnectClicked" HeightRequest="60" BackgroundColor="#10A37F" TextColor="Black" />
+            <Button x:Name="BtnDisconnect" Text="DECONECTARE" Clicked="OnDisconnectClicked" IsVisible="False" BackgroundColor="Red"/>
 
         </VerticalStackLayout>
     </ScrollView>

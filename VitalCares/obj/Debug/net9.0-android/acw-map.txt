@@ -49,9 +49,6 @@ com.google.gson.annotations.Since;com.google.gson.annotations.Since
 GoogleGson.Annotations.IUntil, GoogleGson;com.google.gson.annotations.Until
 GoogleGson.Annotations.IUntil;com.google.gson.annotations.Until
 com.google.gson.annotations.Until;com.google.gson.annotations.Until
-Microcharts.Droid.ChartView, Microcharts.Droid;crc64e9f97cf19b8286a9.ChartView
-Microcharts.Droid.ChartView;crc64e9f97cf19b8286a9.ChartView
-microcharts.droid.ChartView;crc64e9f97cf19b8286a9.ChartView
 Microsoft.Maui.Controls.TapWindowTracker+GestureListener, Microsoft.Maui.Controls;crc64f728827fec74e9c3.TapWindowTracker_GestureListener
 Microsoft.Maui.Controls.TapWindowTracker.GestureListener;crc64f728827fec74e9c3.TapWindowTracker_GestureListener
 microsoft.maui.controls.TapWindowTracker_GestureListener;crc64f728827fec74e9c3.TapWindowTracker_GestureListener

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 using Syncfusion.Maui.Core.Hosting;
+using Microcharts.Maui;
+
 
 namespace VitalCares;
 
@@ -13,6 +15,7 @@ public static class MauiProgram
 			.UseMauiApp<App>()
             .ConfigureSyncfusionCore()
             .UseLocalNotification()
+			.UseMicrocharts()
             .ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

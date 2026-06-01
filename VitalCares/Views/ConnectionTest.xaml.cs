@@ -2,43 +2,134 @@
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;
 using Plugin.LocalNotification;
+using System;
 using System.Text;
 using System.Text.Json;
+using System.Collections.ObjectModel;
+using System.Timers;
+using System.Net.Http.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
+using VitalCares.Services;
+using VitalCares.Classes;
 
 namespace VitalCares.Views;
 
+
+// =========================================================================
+// DEFINIRE CLASĂ CUSTOM PENTRU PERMISIUNILE DE BLUETOOTH PE ANDROID 12+
+// =========================================================================
+public class AndroidBluetoothPermissions : Permissions.BasePlatformPermission
+{
+#if ANDROID
+    public override (string androidPermission, bool isRuntime)[] RequiredPermissions =>
+        new (string androidPermission, bool isRuntime)[]
+        {
+            (Android.Manifest.Permission.BluetoothScan, true),
+            (Android.Manifest.Permission.BluetoothConnect, true)
+        };
+#endif
+}
+
 public partial class ConnectionTest : ContentPage
 {
-    private readonly IBluetoothLE _ble;
-    private readonly IAdapter _adapter;
-    private IDevice _esp32Device;
-    private ICharacteristic _characteristic;
-
-    // UUID-urile din ESP32
+    private DateTime _lastChartUpdate = DateTime.MinValue;
     private readonly Guid ServiceGuid = Guid.Parse("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
     private readonly Guid CharacteristicGuid = Guid.Parse("beb5483e-36e1-4688-b7f5-ea07361b26a8");
-
-    // Numele ESP32-ului tău (verifică în Serial Monitor)
     private const string ESP32_NAME = "VitalCares Monitor";
+
+    public ObservableCollection<EcgPoint> EcgData { get; set; } = new ObservableCollection<EcgPoint>();
+    private int _currentIndex = 0;
+    private const int MaxPoints = 100;
+
+    private readonly HttpClient _httpClient = new HttpClient();
+    private bool _isAlertWindowOpen = false;
+    private const string ApiAlarmUrl = "https://api.newsflowapi.uk/save_alarm.php";
+
+    private PatientThresholds _praguriCurente = new PatientThresholds
+    {
+        max_puls = 93.0,
+        min_puls = 68.0,
+        min_spo2 = 95.0,
+        max_temp = 38.5
+    };
+
+    private int CurrentPatientId => Preferences.Default.Get("CurrentPatientID", 1);
 
     public ConnectionTest()
     {
         InitializeComponent();
-        _ble = CrossBluetoothLE.Current;
-        _adapter = CrossBluetoothLE.Current.Adapter;
+        this.BindingContext = this;
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
 
-        // Verificăm dacă avem un ID salvat
-        string savedId = Preferences.Default.Get("LastDeviceID", string.Empty);
-
-        if (!string.IsNullOrEmpty(savedId) && _ble.State == BluetoothState.On)
+        // Învelim în verificări de siguranță anti-NullReference
+        if (BleManagerService.Instance != null)
         {
-            lblStatus.Text = "Status: Reconectare automată...";
+            BleManagerService.Instance.OnDataReceived += OnBleDataReceivedInUi;
+        }
+
+        await IncarcaPraguriPacientAsync();
+
+        string savedId = Preferences.Default.Get("LastDeviceID", string.Empty);
+        if (!string.IsNullOrEmpty(savedId) && BleManagerService.Instance?.Ble?.State == BluetoothState.On)
+        {
+            if (lblStatus != null) lblStatus.Text = "Status: Reconectare automată...";
             await AttemptAutoConnect(Guid.Parse(savedId));
+        }
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (BleManagerService.Instance != null)
+        {
+            BleManagerService.Instance.OnDataReceived -= OnBleDataReceivedInUi;
+        }
+    }
+
+    private void OnBleDataReceivedInUi(object sender, BleDataEventArgs e)
+    {
+        if (e == null) return;
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            if (lblPuls == null || lblTemp == null || lblHum == null) return;
+
+            lblPuls.Text = e.Puls.ToString();
+            lblTemp.Text = e.Temp.ToString();
+            lblHum.Text = e.Hum.ToString();
+
+            if ((DateTime.Now - _lastChartUpdate).TotalMilliseconds > 100)
+            {
+                UpdateEcgChart(e.EcgValue);
+                _lastChartUpdate = DateTime.Now;
+            }
+
+            CheckMedicalAlerts(e.Puls, e.SpO2, e.Temp);
+        });
+    }
+
+    private async Task IncarcaPraguriPacientAsync()
+    {
+        try
+        {
+            string url = $"https://api.newsflowapi.uk/get_praguri.php?id_pacient={CurrentPatientId}";
+            var praguri = await _httpClient.GetFromJsonAsync<PatientThresholds>(url);
+            if (praguri != null)
+            {
+                _praguriCurente = praguri;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Praguri] Eroare server: {ex.Message}");
         }
     }
 
@@ -46,34 +137,31 @@ public partial class ConnectionTest : ContentPage
     {
         try
         {
-            // Încercăm să luăm dispozitivul direct din sistem (fără scanare)
-            _esp32Device = await _adapter.ConnectToKnownDeviceAsync(deviceId);
+            if (BleManagerService.Instance?.Adapter == null) return;
 
-            if (_esp32Device != null)
+            BleManagerService.Instance.Esp32Device = await BleManagerService.Instance.Adapter.ConnectToKnownDeviceAsync(deviceId);
+            if (BleManagerService.Instance.Esp32Device != null)
             {
-                var service = await _esp32Device.GetServiceAsync(ServiceGuid);
-                _characteristic = await service.GetCharacteristicAsync(CharacteristicGuid);
+                var service = await BleManagerService.Instance.Esp32Device.GetServiceAsync(ServiceGuid);
+                if (service == null) return;
 
-                var connectParams = new Plugin.BLE.Abstractions.ConnectParameters(
-                    autoConnect: true,  // <-- Aceasta îi spune Android-ului să refacă conexiunea imediat ce device-ul e în zonă
-                    forceBleTransport: true
-                );
+                BleManagerService.Instance.Characteristic = await service.GetCharacteristicAsync(CharacteristicGuid);
 
-                if (_characteristic != null)
+                if (BleManagerService.Instance.Characteristic != null)
                 {
-                    await _esp32Device.RequestMtuAsync(256);
-                    _characteristic.ValueUpdated += OnValueUpdated;
-                    await _characteristic.StartUpdatesAsync();
+                    await BleManagerService.Instance.Esp32Device.RequestMtuAsync(256);
+                    BleManagerService.Instance.StartListening();
+                    await BleManagerService.Instance.Characteristic.StartUpdatesAsync();
 
-                    lblStatus.Text = "Status: Reconectat automat ✓";
-                    BtnConnect.IsVisible = false;
-                    BtnDisconnect.IsVisible = true;
+                    if (lblStatus != null) lblStatus.Text = "Status: Reconectat automat ✓";
+                    if (BtnConnect != null) BtnConnect.IsVisible = false;
+                    if (BtnDisconnect != null) BtnDisconnect.IsVisible = true;
                 }
             }
         }
         catch (Exception ex)
         {
-            lblStatus.Text = "Status: Auto-connect eșuat";
+            if (lblStatus != null) lblStatus.Text = "Status: Auto-connect eșuat";
             System.Diagnostics.Debug.WriteLine($"Eroare auto-connect: {ex.Message}");
         }
     }
@@ -82,7 +170,6 @@ public partial class ConnectionTest : ContentPage
     {
         try
         {
-
             if (DeviceInfo.Platform == DevicePlatform.Android && DeviceInfo.Version.Major >= 13)
             {
                 var status = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
@@ -91,272 +178,253 @@ public partial class ConnectionTest : ContentPage
                     await Permissions.RequestAsync<Permissions.PostNotifications>();
                 }
             }
-            // Verifică permisiuni
+
+            // Aici se apelează noua logică combinată de permisiuni
             if (!await CheckPermissionsAsync())
             {
-                await DisplayAlert("Eroare", "Permisiuni Bluetooth refuzate", "OK");
+                await DisplayAlert("Permisiuni Necesare", "Aplicația are nevoie de permisiunea 'Dispozitive în apropiere' (Bluetooth Scan/Connect) pentru a detecta monitorul medical.", "OK");
+                if (BtnConnect != null) BtnConnect.IsEnabled = true;
                 return;
             }
 
-            if (_ble.State != BluetoothState.On)
+            if (BleManagerService.Instance?.Ble == null || BleManagerService.Instance.Ble.State != BluetoothState.On)
             {
-                await DisplayAlert("Eroare", "Activează Bluetooth-ul", "OK");
+                await DisplayAlert("Bluetooth Dezactivat", "Te rugăm să activezi modulul Bluetooth din setările telefonului.", "OK");
+                if (BtnConnect != null) BtnConnect.IsEnabled = true;
                 return;
             }
 
-            lblStatus.Text = "Status: Scanare...";
-            BtnConnect.IsEnabled = false;
-            _esp32Device = null;
+            if (lblStatus != null) lblStatus.Text = "Status: Scanare...";
+            if (BtnConnect != null) BtnConnect.IsEnabled = false;
+            BleManagerService.Instance.Esp32Device = null;
 
-            // Configurează handler-ul ÎNAINTE de scanare
-            _adapter.DeviceDiscovered += OnDeviceDiscovered;
-            _adapter.ScanTimeout = 10000; // 10 secunde
+            BleManagerService.Instance.Adapter.DeviceDiscovered += OnDeviceDiscovered;
+            BleManagerService.Instance.Adapter.ScanTimeout = 10000;
 
-            // Începe scanarea
-            await _adapter.StartScanningForDevicesAsync();
-
-            // Așteaptă finalizarea scanării
+            await BleManagerService.Instance.Adapter.StartScanningForDevicesAsync();
             await Task.Delay(10000);
-            await _adapter.StopScanningForDevicesAsync();
+            await BleManagerService.Instance.Adapter.StopScanningForDevicesAsync();
+            BleManagerService.Instance.Adapter.DeviceDiscovered -= OnDeviceDiscovered;
 
-            _adapter.DeviceDiscovered -= OnDeviceDiscovered;
-
-            if (_esp32Device == null)
+            if (BleManagerService.Instance.Esp32Device == null)
             {
-                lblStatus.Text = "Status: ESP32 nu a fost găsit";
-                BtnConnect.IsEnabled = true;
+                if (lblStatus != null) lblStatus.Text = "Status: Monitor negăsit";
+                if (BtnConnect != null) BtnConnect.IsEnabled = true;
                 return;
             }
 
-            // Conectare
-            lblStatus.Text = "Status: Conectare...";
-
-            var connectParams = new Plugin.BLE.Abstractions.ConnectParameters(
-                autoConnect: true,
-                forceBleTransport: true
-            );
-
+            if (lblStatus != null) lblStatus.Text = "Status: Conectare...";
+            var connectParams = new Plugin.BLE.Abstractions.ConnectParameters(autoConnect: true, forceBleTransport: true);
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-            await _adapter.ConnectToDeviceAsync(_esp32Device, connectParams, cts.Token);
+            await BleManagerService.Instance.Adapter.ConnectToDeviceAsync(BleManagerService.Instance.Esp32Device, connectParams, cts.Token);
 
-            Preferences.Default.Set("LastDeviceID", _esp32Device.Id.ToString());
+            Preferences.Default.Set("LastDeviceID", BleManagerService.Instance.Esp32Device.Id.ToString());
 
             if (DeviceInfo.Platform == DevicePlatform.Android)
             {
-                var mtuSuccess = await _esp32Device.RequestMtuAsync(256);
-                System.Diagnostics.Debug.WriteLine($"MTU setat la 256: {mtuSuccess}");
-                // Un mic delay pentru a lăsa Android-ul să proceseze schimbarea de MTU
+                await BleManagerService.Instance.Esp32Device.RequestMtuAsync(256);
                 await Task.Delay(1000);
             }
 
-            if (_esp32Device.State != Plugin.BLE.Abstractions.DeviceState.Connected)
+            if (BleManagerService.Instance.Esp32Device.State != Plugin.BLE.Abstractions.DeviceState.Connected)
             {
-                await DisplayAlert("Eroare", "Conectarea a eșuat", "OK");
-                BtnConnect.IsEnabled = true;
+                await DisplayAlert("Eroare", "Conectarea cu ESP32 a eșuat", "OK");
+                if (BtnConnect != null) BtnConnect.IsEnabled = true;
                 return;
             }
 
-            // Obține service și characteristic
-            lblStatus.Text = "Status: Căutare servicii...";
+            var service = await BleManagerService.Instance.Esp32Device.GetServiceAsync(ServiceGuid);
+            if (service == null) return;
 
-            var service = await _esp32Device.GetServiceAsync(ServiceGuid);
-            if (service == null)
+            BleManagerService.Instance.Characteristic = await service.GetCharacteristicAsync(CharacteristicGuid);
+            if (BleManagerService.Instance.Characteristic == null) return;
+
+            if (BleManagerService.Instance.Characteristic.CanUpdate)
             {
-                await DisplayAlert("Eroare", $"Service negăsit: {ServiceGuid}", "OK");
-                await ListServicesAsync(); // Pentru debug
-                return;
+                BleManagerService.Instance.StartListening();
+                await BleManagerService.Instance.Characteristic.StartUpdatesAsync();
             }
 
-            _characteristic = await service.GetCharacteristicAsync(CharacteristicGuid);
-            if (_characteristic == null)
-            {
-                await DisplayAlert("Eroare", "Characteristic negăsit", "OK");
-                return;
-            }
-
-            // Activează notificări
-            if (_characteristic.CanUpdate)
-            {
-                _characteristic.ValueUpdated += OnValueUpdated;
-                await _characteristic.StartUpdatesAsync();
-                System.Diagnostics.Debug.WriteLine($"CanUpdate: {_characteristic.CanUpdate}");
-            } else
-            {
-                await DisplayAlert("Eroare", "Characteristic nu suportă notificări", "OK");
-                return;
-            }
-
-                lblStatus.Text = "Status: Conectat ✓";
-            BtnConnect.IsVisible = false;
-            BtnDisconnect.IsVisible = true;
+            if (lblStatus != null) lblStatus.Text = "Status: Conectat ✓";
+            if (BtnConnect != null) { BtnConnect.IsVisible = false; BtnConnect.IsEnabled = true; }
+            if (BtnDisconnect != null) BtnDisconnect.IsVisible = true;
         }
         catch (Exception ex)
         {
             await DisplayAlert("Eroare", $"Excepție: {ex.Message}", "OK");
-            lblStatus.Text = "Status: Eroare";
-            BtnConnect.IsEnabled = true;
+            if (lblStatus != null) lblStatus.Text = "Status: Eroare";
+            if (BtnConnect != null) BtnConnect.IsEnabled = true;
         }
     }
 
-    // Handler pentru dispozitive descoperite
     private void OnDeviceDiscovered(object sender, DeviceEventArgs e)
     {
         var device = e.Device;
-        var name = device.Name ?? "Necunoscut";
-
-        System.Diagnostics.Debug.WriteLine($"Găsit: {name} | ID: {device.Id}");
-
-        // Actualizează UI pentru debug
-        MainThread.BeginInvokeOnMainThread(() =>
+        if (device != null && !string.IsNullOrEmpty(device.Name) && device.Name.Contains(ESP32_NAME, StringComparison.OrdinalIgnoreCase))
         {
-            lblStatus.Text = $"Găsit: {name}";
-        });
-
-        // Verifică dacă e ESP32-ul nostru
-        if (!string.IsNullOrEmpty(device.Name) &&
-            device.Name.Contains(ESP32_NAME, StringComparison.OrdinalIgnoreCase))
-        {
-            _esp32Device = device;
-            System.Diagnostics.Debug.WriteLine($"ESP32 găsit: {device.Name}");
-        }
-    }
-
-    private void OnValueUpdated(object sender, CharacteristicUpdatedEventArgs args)
-    {
-        try
-        {
-            var bytes = args.Characteristic.Value;
-            string jsonString = Encoding.UTF8.GetString(bytes);
-
-            MainThread.BeginInvokeOnMainThread(() =>
+            if (BleManagerService.Instance != null)
             {
-                try
-                {
-                    using JsonDocument doc = JsonDocument.Parse(jsonString);
-                    JsonElement root = doc.RootElement;
-
-                    double p = root.GetProperty("puls").GetDouble();
-                    double s = root.GetProperty("spo2").GetDouble();
-                    double t = root.GetProperty("temp").GetDouble();
-
-                    // Forțăm afișarea ca să fim siguri că firul de UI primește comanda
-                    lblPuls.Text = p.ToString();
-                    lblSpO2.Text = s.ToString();
-                    lblTemp.Text = t.ToString();
-                    lblHum.Text = root.GetProperty("hum").ToString();
-                    lblEcg.Text = root.GetProperty("ecg").ToString();
-
-                    lblStatus.Text = "Date actualizate: " + DateTime.Now.ToString("HH:mm:ss");
-
-                    CheckMedicalAlerts(p,s,t);
-                }
-                catch (Exception ex)
-                {
-                    lblStatus.Text = "Eroare JSON: " + ex.Message;
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine("Eroare critică BLE: " + ex.Message);
+                BleManagerService.Instance.Esp32Device = device;
+            }
         }
     }
 
-    // Debug: listează toate serviciile
-    private async Task ListServicesAsync()
+    private void UpdateEcgChart(float newValue)
     {
-        if (_esp32Device == null) return;
-
-        var services = await _esp32Device.GetServicesAsync();
-        var sb = new StringBuilder("Servicii găsite:\n");
-
-        foreach (var svc in services)
+        if (EcgData == null) return;
+        EcgData.Add(new EcgPoint { Index = _currentIndex++, Value = newValue });
+        if (EcgData.Count > MaxPoints)
         {
-            sb.AppendLine($"- {svc.Id}");
+            EcgData.RemoveAt(0);
         }
-
-        await DisplayAlert("Debug", sb.ToString(), "OK");
     }
 
+    // =========================================================================
+    // METODĂ ACTUALIZATĂ: SOLICITĂ CORECT ȘI LOCAȚIA ȘI DISPOZITIVELE DIN APROPIERE
+    // =========================================================================
     private async Task<bool> CheckPermissionsAsync()
     {
         if (DeviceInfo.Platform == DevicePlatform.Android)
         {
-           
-            // Android 12+ necesită permisiuni noi
+            // 1. Verifică/Cere Locația (obligatorie pentru motoarele BLE)
             var locationStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
             if (locationStatus != PermissionStatus.Granted)
             {
                 locationStatus = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
             }
+            if (locationStatus != PermissionStatus.Granted) return false;
 
-            var bluetoothStatus = await Permissions.CheckStatusAsync<Permissions.Bluetooth>();
+            // 2. Verifică/Cere "Dispozitive în apropiere" (Rezolvă eroarea de scanare Android 12+)
+            var bluetoothStatus = await Permissions.CheckStatusAsync<AndroidBluetoothPermissions>();
             if (bluetoothStatus != PermissionStatus.Granted)
             {
-                bluetoothStatus = await Permissions.RequestAsync<Permissions.Bluetooth>();
+                bluetoothStatus = await Permissions.RequestAsync<AndroidBluetoothPermissions>();
             }
-
-            return locationStatus == PermissionStatus.Granted;
+            return bluetoothStatus == PermissionStatus.Granted;
         }
-
         return true;
     }
 
     private async void OnDisconnectClicked(object sender, EventArgs e)
     {
-        if (_esp32Device != null)
+        if (BleManagerService.Instance?.Esp32Device != null)
         {
-            await _adapter.DisconnectDeviceAsync(_esp32Device);
-            BtnConnect.IsVisible = true;
-            BtnDisconnect.IsVisible = false;
-            lblStatus.Text = "Status: Deconectat";
+            if (BleManagerService.Instance.Characteristic != null)
+            {
+                await BleManagerService.Instance.Characteristic.StopUpdatesAsync();
+            }
+
+            await BleManagerService.Instance.Adapter.DisconnectDeviceAsync(BleManagerService.Instance.Esp32Device);
+            if (BtnConnect != null) BtnConnect.IsVisible = true;
+            if (BtnDisconnect != null) BtnDisconnect.IsVisible = false;
+            if (lblStatus != null) lblStatus.Text = "Status: Deconectat";
         }
     }
 
     private void CheckMedicalAlerts(double puls, double spo2, double temp)
     {
-        string alertMessage = "";
+        if (_isAlertWindowOpen || _praguriCurente == null) return;
 
-        if (puls > MedicalThresholds.MaxPuls)
-            alertMessage += $"Puls ridicat: {puls} BPM! ";
+        string tipParametruCritic = "";
+        double valoareCritica = 0;
+        string motivAlarma = "";
 
-        if (spo2 < MedicalThresholds.MinSpO2)
-            alertMessage += $"Saturație oxigen scăzută: {spo2}%! ";
-
-        if (temp > MedicalThresholds.MaxTemp)
-            alertMessage += $"Febră detectată: {temp}°C! ";
-
-        if (!string.IsNullOrEmpty(alertMessage))
+        if (puls > _praguriCurente.max_puls || puls < _praguriCurente.min_puls)
         {
-            SendNotification("Alertă VitalCares", alertMessage);
+            tipParametruCritic = "Puls";
+            valoareCritica = puls;
+            motivAlarma = $"Puls anormal: {puls} BPM!";
+        }
+        else if (spo2 < _praguriCurente.min_spo2)
+        {
+            tipParametruCritic = "SpO2";
+            valoareCritica = spo2;
+            motivAlarma = $"SpO2 critic: {spo2}%!";
+        }
+        else if (temp > _praguriCurente.max_temp)
+        {
+            tipParametruCritic = "Temperatura";
+            valoareCritica = temp;
+            motivAlarma = $"Febră: {temp}°C!";
+        }
+
+        if (!string.IsNullOrEmpty(tipParametruCritic))
+        {
+            _isAlertWindowOpen = true;
+            SendNotification("ALERTĂ VITALĂ INSTANTANEE", motivAlarma);
+
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                string selectieStare = await DisplayActionSheet(
+                    title: $"⚠ Valori Critice: {motivAlarma}",
+                    cancel: "Sunt OK / Ignoră Alarma",
+                    destruction: null,
+                    buttons: new string[] { "Mă simt amețit", "Am făcut efort fizic", "Sunt agitat", "Alt motiv nespecificat" });
+
+                if (selectieStare != "Sunt OK / Ignoră Alarma" && selectieStare != null)
+                {
+                    // MODIFICARE AICI: Dacă a ales "Alt motiv", îi deschidem o casetă de text
+                    if (selectieStare == "Alt motiv nespecificat")
+                    {
+                        string textCustom = await DisplayPromptAsync(
+                            title: "Motiv Custom",
+                            message: "Descrie pe scurt cum te simți sau ce s-a întâmplat:",
+                            accept: "Trimite",
+                            cancel: "Anulează",
+                            placeholder: "Ex: Am băut cafea / Am emoții...");
+
+                        // Dacă a completat ceva și nu a dat "Anulează", înlocuim comentariul trimis la cloud
+                        if (!string.IsNullOrWhiteSpace(textCustom))
+                        {
+                            selectieStare = textCustom;
+                        }
+                        else
+                        {
+                            // Dacă a dat anulează sau a lăsat gol, punem un text implicit ca să nu trimitem gol la server
+                            selectieStare = "Alt motiv (Pacientul nu a specificat)";
+                        }
+                    }
+
+                    // Trimitem datele la cloud (acum selectieStare conține textul scris de el)
+                    await TrimiteAlarmaLaCloudAsync(tipParametruCritic, valoareCritica, selectieStare);
+                }
+                _isAlertWindowOpen = false;
+            });
+        }
+    }
+
+    private async Task TrimiteAlarmaLaCloudAsync(string parametru, double valoare, string comentariu)
+    {
+        try
+        {
+            var alarmPayload = new { id_pacient = CurrentPatientId, tip_parametru = parametru, valoare_critica = valoare, mesaj_pacient = comentariu };
+            string json = JsonSerializer.Serialize(alarmPayload);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            await _httpClient.PostAsync(ApiAlarmUrl, content);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Alarma] Eroare rețea: {ex.Message}");
         }
     }
 
     private void SendNotification(string title, string message)
     {
-        // Folosind Plugin.LocalNotification
-        var request = new NotificationRequest
+        try
         {
-            NotificationId = 1000,
-            Title = title,
-            Description = message,
-            BadgeNumber = 1,
-            Schedule = { NotifyTime = DateTime.Now }
-        };
-        LocalNotificationCenter.Current.Show(request);
-
-        // Opțional: Schimbă culoarea unui label în UI pentru feedback vizual imediat
-        MainThread.BeginInvokeOnMainThread(() => {
-            lblStatus.Text = "ATENȚIE: Valori anormale!";
-            lblStatus.TextColor = Colors.Red;
-        });
-    }
-
-    public static class MedicalThresholds
-    {
-        public const double MaxPuls = 93.0;
-        public const double MinPuls = 68.0;
-        public const double MinSpO2 = 98.0;
-        public const double MaxTemp = 39.0;
+            var request = new NotificationRequest
+            {
+                NotificationId = 1000,
+                Title = title,
+                Description = message,
+                BadgeNumber = 1,
+                Schedule = { NotifyTime = DateTime.Now }
+            };
+            LocalNotificationCenter.Current.Show(request);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Notificare] Eroare: {ex.Message}");
+        }
     }
 }

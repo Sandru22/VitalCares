@@ -1,99 +1,114 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:micro="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
              x:Class="VitalCares.Views.DashboardPage"
-             Title="DashboardPage">
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="15">
+             Title="Istoricul măsurătorilor"
+             BackgroundColor="#F4F6F9">
+    <Grid RowDefinitions="Auto, *">
 
-            <Label Text="DATE COLECTATE LIVE (10s)" 
-                   FontSize="12" 
-                   FontAttributes="Bold" 
-                   TextColor="#5F6368"
-                   HorizontalOptions="Center" />
+        <Border Grid.Row="0" 
+                Margin="15,15,15,5" 
+                Padding="15,12" 
+                StrokeShape="RoundRectangle 12" 
+                BackgroundColor="White" 
+                StrokeThickness="0">
+            <Border.Shadow>
+                <Shadow Brush="#000000" Offset="0,2" Radius="6" Opacity="0.04" />
+            </Border.Shadow>
 
-            <Border Stroke="#E0E0E0"
-                    StrokeThickness="1"
-                    Background="White"
-                    Padding="20">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="20" />
-                </Border.StrokeShape>
-                <Border.Shadow>
-                    <Shadow Brush="Black" Offset="2,2" Radius="5" Opacity="0.05" />
-                </Border.Shadow>
-
-                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
-                    <Label Text="RITM CARDIAC" 
-                           FontSize="14" 
-                           TextColor="#70757A" 
-                           HorizontalOptions="Center" />
-                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                        <Label Text="{Binding CurrentPuls}" 
-                               FontSize="54" 
-                               FontAttributes="Bold" 
-                               TextColor="#D32F2F" />
-                        <Label Text="BPM" 
-                               FontSize="18" 
-                               VerticalOptions="End" 
-                               Margin="0,0,0,12" 
-                               TextColor="#D32F2F" />
-                    </HorizontalStackLayout>
+            <Grid ColumnDefinitions="*, Auto">
+                <VerticalStackLayout Grid.Column="0" Spacing="3">
+                    <Label Text="Selectează Ziua pentru Analiză" FontSize="12" TextColor="#6C757D" FontAttributes="Bold"/>
+                    <DatePicker x:Name="dpFiltruData" 
+                                DateSelected="OnDateSelected" 
+                                Format="dd MMMM yyyy" 
+                                TextColor="#10A37F" FontAttributes="Bold"/>
                 </VerticalStackLayout>
-            </Border>
-
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
-
-                <Border Grid.Column="0" Stroke="#E0E0E0" StrokeThickness="1" Background="White" Padding="15">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="15" />
-                    </Border.StrokeShape>
-                    <VerticalStackLayout HorizontalOptions="Center">
-                        <Label Text="TEMP." FontSize="12" TextColor="#70757A" HorizontalOptions="Center" />
-                        <Label Text="{Binding CurrentTemp, StringFormat='{0:F1}°C'}" 
-                               FontSize="24" 
-                               FontAttributes="Bold" 
-                               TextColor="#1976D2" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border Grid.Column="1" Stroke="#E0E0E0" StrokeThickness="1" Background="White" Padding="15">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="15" />
-                    </Border.StrokeShape>
-                    <VerticalStackLayout HorizontalOptions="Center">
-                        <Label Text="UMIDITATE" FontSize="12" TextColor="#70757A" HorizontalOptions="Center" />
-                        <Label Text="{Binding CurrentHumidity, StringFormat='{0}%'}" 
-                               FontSize="24" 
-                               FontAttributes="Bold" 
-                               TextColor="#00796B" />
-                    </VerticalStackLayout>
-                </Border>
+                <Image Grid.Column="1" Source="calendar_icon.png" WidthRequest="22" HeightRequest="22" VerticalOptions="Center" Opacity="0.5"/>
             </Grid>
+        </Border>
 
-            <Label Text="RECOMANDĂRI MEDICALE" FontSize="14" FontAttributes="Bold" Margin="5,10,0,0" TextColor="#5F6368"/>
-            <Border Stroke="#2196F3" StrokeThickness="2" Background="#E3F2FD" Padding="15">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="10" />
-                </Border.StrokeShape>
-                <VerticalStackLayout Spacing="5">
-                    <Label Text="{Binding MedicRecommendation}" 
-                           FontSize="16" 
-                           TextColor="#0D47A1" 
-                           LineBreakMode="WordWrap" />
-                </VerticalStackLayout>
-            </Border>
+        <ScrollView Grid.Row="1" Padding="15,10,15,15">
+            <VerticalStackLayout Spacing="16">
 
-            <Button Text="SEMALEAZĂ STARE NOUĂ" 
-                    Command="{Binding AddNoteCommand}"
-                    BackgroundColor="#D32F2F"
-                    TextColor="White"
-                    CornerRadius="25"
-                    HeightRequest="55"
-                    FontSize="16"
-                    FontAttributes="Bold"
-                    Margin="0,15,0,0" />
+                <Border x:Name="lblNoDataWarning" 
+                        BackgroundColor="#FFF3CD" 
+                        Stroke="#FFECB5"
+                        StrokeShape="RoundRectangle 8" 
+                        Padding="15,12" 
+                        IsVisible="False"
+                        Margin="0,5">
+                    <HorizontalStackLayout Spacing="8" HorizontalOptions="Center">
+                        <Label Text="⚠" TextColor="#664D03" FontAttributes="Bold" FontSize="14"/>
+                        <Label Text="Nu există măsurători înregistrate în această zi." 
+                               TextColor="#664D03" 
+                               FontAttributes="Bold" 
+                               FontSize="14"/>
+                    </HorizontalStackLayout>
+                </Border>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                <Border StrokeShape="RoundRectangle 12" Padding="16,14" BackgroundColor="White" StrokeThickness="0" x:Name="panelPuls">
+                    <Border.Shadow>
+                        <Shadow Brush="#000000" Offset="0,2" Radius="6" Opacity="0.03" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Grid.Column="0" Text="Evoluție Puls (BPM)" FontAttributes="Bold" FontSize="16" TextColor="#222222"/>
+                            <Label Grid.Column="1" x:Name="lblPulsMediu" Text="Medie: --" FontSize="12" TextColor="#10A37F" FontAttributes="Bold" VerticalOptions="Center"/>
+                        </Grid>
+                        <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Always">
+                            <micro:ChartView x:Name="chartPuls" HeightRequest="180" WidthRequest="1200" />
+                        </ScrollView>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 12" Padding="16,14" BackgroundColor="White" StrokeThickness="0" x:Name="panelTemp">
+                    <Border.Shadow>
+                        <Shadow Brush="#000000" Offset="0,2" Radius="6" Opacity="0.03" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Grid.Column="0" Text="Temperatură Corporală (°C)" FontAttributes="Bold" FontSize="16" TextColor="#222222"/>
+                            <Label Grid.Column="1" x:Name="lblTempMediu" Text="Medie: --" FontSize="12" TextColor="#10A37F" FontAttributes="Bold" VerticalOptions="Center"/>
+                        </Grid>
+                        <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Always">
+                            <micro:ChartView x:Name="chartTemp" HeightRequest="180" WidthRequest="1200" />
+                        </ScrollView>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 12" Padding="16,14" BackgroundColor="White" StrokeThickness="0" x:Name="panelHum">
+                    <Border.Shadow>
+                        <Shadow Brush="#000000" Offset="0,2" Radius="6" Opacity="0.03" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Grid.Column="0" Text="Umiditate Ambientă (%)" FontAttributes="Bold" FontSize="16" TextColor="#222222"/>
+                            <Label Grid.Column="1" x:Name="lblHumMedie" Text="Medie: --" FontSize="12" TextColor="#10A37F" FontAttributes="Bold" VerticalOptions="Center"/>
+                        </Grid>
+                        <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Always">
+                            <micro:ChartView x:Name="chartHum" HeightRequest="180" WidthRequest="1200" />
+                        </ScrollView>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 12" Padding="16,14" BackgroundColor="White" StrokeThickness="0" x:Name="panelEcg">
+                    <Border.Shadow>
+                        <Shadow Brush="#000000" Offset="0,2" Radius="6" Opacity="0.03" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Grid.Column="0" Text="Semnal ECG Înregistrat" FontAttributes="Bold" FontSize="16" TextColor="#222222"/>
+                            <Label Grid.Column="1" x:Name="lblEcgTotal" Text="Eșantioane: --" FontSize="12" TextColor="#10A37F" FontAttributes="Bold" VerticalOptions="Center"/>
+                        </Grid>
+                        <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Always">
+                            <micro:ChartView x:Name="chartEcg" HeightRequest="180" WidthRequest="1200" />
+                        </ScrollView>
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

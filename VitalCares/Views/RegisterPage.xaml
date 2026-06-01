@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="VitalCares.Views.RegisterPage"
+             Title="Înregistrare Pacient"
+             BackgroundColor="#10A37F">
+    <ScrollView>
+        <Border Margin="15,20" 
+                Padding="20" 
+                StrokeShape="RoundRectangle 12" 
+                StrokeThickness="0" 
+                BackgroundColor="White">
+
+            <Border.Shadow>
+                <Shadow Brush="#000000" Offset="0,4" Radius="10" Opacity="0.05" />
+            </Border.Shadow>
+
+            <VerticalStackLayout Spacing="18">
+
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center" Margin="0,0,0,10">
+                    <Image Source="splash.png" HeightRequest="60" HorizontalOptions="Center" Margin="0,0,0,5"/>
+                    <Label Text="Alătură-te VitalCares" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" TextColor="#10A37F"/>
+                    <Label Text="Introduceți toate datele dosarului medical" FontSize="13" HorizontalOptions="Center" TextColor="#6C757D" HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+
+                <Border BackgroundColor="#F4F6F9" StrokeThickness="0" StrokeShape="RoundRectangle 6" Padding="10,6">
+                    <Label Text="Date Autentificare" FontAttributes="Bold" TextColor="#10A37F" FontSize="14"/>
+                </Border>
+
+                <VerticalStackLayout Spacing="5">
+                    <HorizontalStackLayout Spacing="3">
+                        <Label Text="Adresă de email" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                        <Label Text="*" TextColor="Red" FontAttributes="Bold" FontSize="13"/>
+                    </HorizontalStackLayout>
+                    <Entry x:Name="txtEmail" Placeholder="exemplu@vitalcares.ro" Keyboard="Email" HeightRequest="45" TextColor="#333333" PlaceholderColor="#999999"/>
+                </VerticalStackLayout>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <VerticalStackLayout Grid.Column="0" Spacing="5">
+                        <HorizontalStackLayout Spacing="3">
+                            <Label Text="Parolă" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                            <Label Text="*" TextColor="Red" FontAttributes="Bold" FontSize="13"/>
+                        </HorizontalStackLayout>
+                        <Entry x:Name="txtPassword" Placeholder="••••••••" IsPassword="True" HeightRequest="45" TextColor="#333333" PlaceholderColor="#999999"/>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Column="1" Spacing="5">
+                        <HorizontalStackLayout Spacing="3">
+                            <Label Text="Confirmă" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                            <Label Text="*" TextColor="Red" FontAttributes="Bold" FontSize="13"/>
+                        </HorizontalStackLayout>
+                        <Entry x:Name="txtConfirmPassword" Placeholder="••••••••" IsPassword="True" HeightRequest="45" TextColor="#333333" PlaceholderColor="#999999"/>
+                    </VerticalStackLayout>
+                </Grid>
+
+
+                <Border BackgroundColor="#F4F6F9" StrokeThickness="0" StrokeShape="RoundRectangle 6" Padding="10,6" Margin="0,5,0,0">
+                    <Label Text="Date Personale" FontAttributes="Bold" TextColor="#10A37F" FontSize="14"/>
+                </Border>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <VerticalStackLayout Grid.Column="0" Spacing="5">
+                        <Label Text="Nume" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                        <Entry x:Name="txtNume" Placeholder="Popescu" HeightRequest="45" TextColor="#333333" PlaceholderColor="#999999"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="5">
+                        <Label Text="Prenume" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                        <Entry x:Name="txtPrenume" Placeholder="Ion" HeightRequest="45" TextColor="#333333" PlaceholderColor="#999999"/>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <Grid ColumnDefinitions="2*,*" ColumnSpacing="12">
+                    <VerticalStackLayout Grid.Column="0" Spacing="5">
+                        <Label Text="CNP" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                        <Entry x:Name="txtCNP" Placeholder="5xxxxxxxxxxxx" Keyboard="Numeric" MaxLength="13" HeightRequest="45" TextColor="#333333" PlaceholderColor="#999999"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="5">
+                        <Label Text="Vârstă" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                        <Entry x:Name="txtVarsta" Placeholder="30" Keyboard="Numeric" HeightRequest="45" TextColor="#333333" PlaceholderColor="#999999"/>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Număr de Telefon" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                    <Entry x:Name="txtTelefon" Placeholder="07xxxxxxxx" Keyboard="Telephone" HeightRequest="45" TextColor="#333333" PlaceholderColor="#999999"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Medicul Curant" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                    <Border StrokeShape="RoundRectangle 4" Stroke="#CCCCCC" StrokeThickness="1" Padding="5,0">
+                        <Picker x:Name="pckMedic" Title="Alege medicul tău..." ItemDisplayBinding="{Binding NumeComplet}" HeightRequest="45" TextColor="#333333" TitleColor="#999999"/>
+                    </Border>
+                </VerticalStackLayout>
+
+
+                <Border BackgroundColor="#F4F6F9" StrokeThickness="0" StrokeShape="RoundRectangle 6" Padding="10,6" Margin="0,5,0,0">
+                    <Label Text="Adresă Domiciliu" FontAttributes="Bold" TextColor="#10A37F" FontSize="14"/>
+                </Border>
+
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Strada și Numărul" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                    <Entry x:Name="txtStrada" Placeholder="Str. Libertății, Nr. 10" HeightRequest="45" TextColor="#333333" PlaceholderColor="#999999"/>
+                </VerticalStackLayout>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <VerticalStackLayout Grid.Column="0" Spacing="5">
+                        <Label Text="Oraș" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                        <Entry x:Name="txtOras" Placeholder="Timișoara" HeightRequest="45" TextColor="#333333" PlaceholderColor="#999999"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="5">
+                        <Label Text="Județ" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                        <Entry x:Name="txtJudet" Placeholder="Timiș" HeightRequest="45" TextColor="#333333" PlaceholderColor="#999999"/>
+                    </VerticalStackLayout>
+                </Grid>
+
+
+                <Border BackgroundColor="#F4F6F9" StrokeThickness="0" StrokeShape="RoundRectangle 6" Padding="10,6" Margin="0,5,0,0">
+                    <Label Text="Informații Profesionale" FontAttributes="Bold" TextColor="#10A37F" FontSize="14"/>
+                </Border>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <VerticalStackLayout Grid.Column="0" Spacing="5">
+                        <Label Text="Profesie" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                        <Entry x:Name="txtProfesie" Placeholder="Inginer" HeightRequest="45" TextColor="#333333" PlaceholderColor="#999999"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="5">
+                        <Label Text="Loc de muncă" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                        <Entry x:Name="txtLocMunca" Placeholder="Compania X" HeightRequest="45" TextColor="#333333" PlaceholderColor="#999999"/>
+                    </VerticalStackLayout>
+                </Grid>
+
+
+                <Border BackgroundColor="#F4F6F9" StrokeThickness="0" StrokeShape="RoundRectangle 6" Padding="10,6" Margin="0,5,0,0">
+                    <Label Text="Date Medicale" FontAttributes="Bold" TextColor="#10A37F" FontSize="14"/>
+                </Border>
+
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Istoric medical / Boli cronice" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                    <Editor x:Name="txtIstoric" Placeholder="Introduceți detalii..." HeightRequest="90" TextColor="#333333" PlaceholderColor="#999999"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Alergii cunoscute" FontAttributes="Bold" TextColor="#333333" FontSize="13"/>
+                    <Editor x:Name="txtAlergii" Placeholder="Penicilină, polen..." HeightRequest="70" TextColor="#333333" PlaceholderColor="#999999"/>
+                </VerticalStackLayout>
+
+
+                <Button Text="ÎNREGISTRARE COMPLETĂ" 
+                        Clicked="OnRegisterClicked" 
+                        HeightRequest="52" 
+                        BackgroundColor="#10A37F" 
+                        TextColor="White" 
+                        FontAttributes="Bold" 
+                        CornerRadius="8" 
+                        Margin="0,15,0,5"/>
+
+            </VerticalStackLayout>
+        </Border>
+    </ScrollView>
+</ContentPage>
